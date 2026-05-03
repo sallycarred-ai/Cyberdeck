@@ -33,22 +33,35 @@ draw_ui() {
     IP=$(hostname -I | awk '{print $1}')
     TIME=$(date +%H:%M)
 
-    printf "  %-14s  TIME: %s\n" "" "$TIME"
-    printf "  %-14s  CPU : %s%%\n" "" "$CPU"
-    printf "  %-14s  MEM : %sMB\n" "" "$MEM"
-    printf "  %-14s  IP  : %s\n" "" "$IP"
-    echo "  -----------------------------"
+    # 🔲 TOP STATUS BAR
+    printf "  TIME: %-6s | CPU: %-5s%% | MEM: %-5sMB\n" "$TIME" "$CPU" "$MEM"
+    printf "  IP: %-15s\n" "$IP"
+    echo "  ------------------------------------"
 
+    # 📋 MENU (bigger feel via spacing)
     for i in "${!OPTIONS[@]}"; do
         if [ $i -eq $SELECTED ]; then
-            printf "  > %-12s  %s\n" "${OPTIONS[$i]}" ""
+            printf "   > %-14s\n" "${OPTIONS[$i]}"
         else
-            printf "    %-12s  %s\n" "${OPTIONS[$i]}" ""
+            printf "     %-14s\n" "${OPTIONS[$i]}"
         fi
     done
 
     echo ""
-    echo "  [ SYSTEM READY ]"
+    echo "  ===================================="
+
+    # 🔥 BOTTOM PANEL (fills the space + adds vibe)
+    case $SELECTED in
+        0) echo "   📝 Open notes editor" ;;
+        1) echo "   📸 Browse photos" ;;
+        2) echo "   🎬 View videos" ;;
+        3) echo "   ⚙️  System monitor" ;;
+        4) echo "   📁 File explorer" ;;
+        5) echo "   ⚡ Quick capture note" ;;
+    esac
+
+    echo ""
+    echo "   [ SYSTEM READY ]"
 }
 
 handle_input() {
