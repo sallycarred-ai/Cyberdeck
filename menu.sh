@@ -17,30 +17,43 @@ boot_sequence() {
     sleep 0.8
 }
 
-draw_ui() {
-    tput cup 0 0
-
+draw_static() {
+    clear
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
 
-    TIME=$(date +%H:%M)
-    CPU=$(top -bn1 | awk '/Cpu/ {print $2}')
-    MEM=$(free -m | awk '/Mem:/ {print $3}')
-    IP=$(hostname -I | awk '{print $1}')
-
     echo "┌────────────────────────────────────────┐"
-    printf "│ TIME %-5s │ CPU %-5s%% │ MEM %-5sMB │\n" "$TIME" "$CPU" "$MEM"
-    printf "│ IP   %-34s │\n" "$IP"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
     echo "├──────────────────┬─────────────────────┤"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "│                                        │"
+    echo "├──────────────────┴─────────────────────┤"
+    echo "│  ↑/↓ select        SPACE launch         │"
+    echo "│  ◆ SYSTEM READY ◆                       │"
+    echo "└────────────────────────────────────────┘"
+}
+
+draw_dynamic() {
+    # move cursor to menu start (adjust if needed)
+    tput cup 8 0
 
     for i in "${!OPTIONS[@]}"; do
         case $i in
             0) INFO="Open notes" ;;
-            1) INFO="Image files" ;;
-            2) INFO="Video files" ;;
-            3) INFO="Monitor system" ;;
-            4) INFO="Browse files" ;;
-            5) INFO="Quick capture" ;;
+            1) INFO="Images" ;;
+            2) INFO="Videos" ;;
+            3) INFO="System" ;;
+            4) INFO="Files" ;;
+            5) INFO="Quick note" ;;
         esac
 
         if [ "$i" -eq "$SELECTED" ]; then
@@ -49,11 +62,6 @@ draw_ui() {
             printf "│   %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
     done
-
-    echo "├──────────────────┴─────────────────────┤"
-    echo "│  ↑/↓ select        SPACE launch         │"
-    echo "│  ◆ SYSTEM READY ◆                       │"
-    echo "└────────────────────────────────────────┘"
 }
 
 run_selection() {
@@ -66,6 +74,9 @@ run_selection() {
         4) mc ;;
         5) nano ~/quicknote.txt ;;
     esac
+
+    draw_static
+    draw_dynamic
 }
 
 handle_input() {
@@ -91,15 +102,16 @@ handle_input() {
 }
 
 boot_sequence
-clear
 tput civis
-draw_ui    
+
+draw_static
+draw_dynamic
 
 while true; do
-    OLD_SELECTED=$SELECTED
+    OLD=$SELECTED
     handle_input
 
-    if [ "$OLD_SELECTED" -ne "$SELECTED" ]; then
-        draw_ui
+    if [ "$OLD" -ne "$SELECTED" ]; then
+        draw_dynamic
     fi
 done
