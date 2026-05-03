@@ -13,8 +13,6 @@ boot_sequence() {
     sleep 0.3
     echo "[BOOT] Checking network..."
     sleep 0.3
-    echo "[BOOT] Mounting modules..."
-    sleep 0.3
     echo "[OK] SYSTEM READY"
     sleep 1
 }
@@ -22,57 +20,49 @@ boot_sequence() {
 draw_ui() {
     clear
 
-    # 🔥 HEADER
     toilet -f small -F border "CYBERDECK SAL"
-
-    echo ""
-    date +"   %H:%M"
-    echo "   Use ↑ ↓ and ENTER"
     echo ""
 
-    # 📋 MENU
+    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
+    MEM=$(free -m | awk '/Mem:/ {print $3}')
+    IP=$(hostname -I | awk '{print $1}')
+    TIME=$(date +%H:%M)
+
+    printf "  %-14s  TIME: %s\n" "" "$TIME"
+    printf "  %-14s  CPU : %s%%\n" "" "$CPU"
+    printf "  %-14s  MEM : %sMB\n" "" "$MEM"
+    printf "  %-14s  IP  : %s\n" "" "$IP"
+    echo "  -----------------------------"
+
     for i in "${!OPTIONS[@]}"; do
         if [ $i -eq $SELECTED ]; then
-            echo "   > ${OPTIONS[$i]}"
+            printf "  > %-12s  %s\n" "${OPTIONS[$i]}" ""
         else
-            echo "     ${OPTIONS[$i]}"
+            printf "    %-12s  %s\n" "${OPTIONS[$i]}" ""
         fi
     done
 
     echo ""
-    echo "   -----------------------"
-
-    # 📊 SYSTEM PANEL
-    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
-    MEM=$(free -m | awk '/Mem:/ {print $3}')
-    IP=$(hostname -I | awk '{print $1}')
-
-    echo "   CPU: ${CPU}%"
-    echo "   MEM: ${MEM}MB"
-    echo "   IP : ${IP}"
-
-    echo ""
-    echo "   ======================="
-    echo "      SYSTEM READY"
-    echo "   ======================="
+    echo "  [ SYSTEM READY ]"
 }
 
 handle_input() {
     read -rsn1 key
+
     if [[ $key == $'\x1b' ]]; then
         read -rsn2 key
         case "$key" in
-            "[A") ((SELECTED--)) ;; # UP
-            "[B") ((SELECTED++)) ;; # DOWN
+            "[A") ((SELECTED--)) ;;
+            "[B") ((SELECTED++)) ;;
         esac
     elif [[ $key == "" ]]; then
         run_selection
     fi
 
-    # Wrap around
     if [ $SELECTED -lt 0 ]; then
         SELECTED=$((${#OPTIONS[@]} - 1))
     fi
+
     if [ $SELECTED -ge ${#OPTIONS[@]} ]; then
         SELECTED=0
     fi
@@ -89,10 +79,8 @@ run_selection() {
     esac
 }
 
-# 🚀 STARTUP
 boot_sequence
 
-# 🔁 LOOP
 while true; do
     draw_ui
     handle_input
