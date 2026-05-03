@@ -2,7 +2,7 @@
 while true
 do
   clear
-  toilet -f small "CYBERDECK"
+  toilet -f mono12 -F border "CYBERDECK SAL"
   echo ""
   echo ""
   echo "$(date +%H:%M)"
