@@ -7,11 +7,14 @@ boot_sequence() {
     clear
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
-    for msg in "Initialising core" "Loading modules" "Checking network" "Mounting interface" "System ready"; do
-        echo "  [BOOT] $msg..."
-        sleep 0.25
-    done
-    sleep 0.6
+    echo "  [BOOT] Loading SAL OS..."
+    sleep 0.4
+    echo "  [BOOT] Checking modules..."
+    sleep 0.4
+    echo "  [BOOT] Network online..."
+    sleep 0.4
+    echo "  [OK] System ready"
+    sleep 0.8
 }
 
 draw_ui() {
@@ -25,20 +28,6 @@ draw_ui() {
     MEM=$(free -m | awk '/Mem:/ {print $3}')
     IP=$(hostname -I | awk '{print $1}')
 
-    FRAME=$((SECONDS % 4))
-    case $FRAME in
-        0) SPIN="-" ;;
-        1) SPIN="\\" ;;
-        2) SPIN="|" ;;
-        3) SPIN="/" ;;
-    esac
-
-    case $((SECONDS % 3)) in
-        0) BAR="░▒▓" ;;
-        1) BAR="▒▓█" ;;
-        2) BAR="▓█▓" ;;
-    esac
-
     echo "┌────────────────────────────────────────┐"
     printf "│ TIME %-5s │ CPU %-5s%% │ MEM %-5sMB │\n" "$TIME" "$CPU" "$MEM"
     printf "│ IP   %-34s │\n" "$IP"
@@ -46,12 +35,12 @@ draw_ui() {
 
     for i in "${!OPTIONS[@]}"; do
         case $i in
-            0) INFO="Edit notes" ;;
-            1) INFO="Scan images" ;;
-            2) INFO="Load media" ;;
-            3) INFO="Monitor sys" ;;
+            0) INFO="Open notes" ;;
+            1) INFO="Image files" ;;
+            2) INFO="Video files" ;;
+            3) INFO="Monitor" ;;
             4) INFO="Browse files" ;;
-            5) INFO="Capture note" ;;
+            5) INFO="Fast note" ;;
         esac
 
         if [ "$i" -eq "$SELECTED" ]; then
@@ -59,10 +48,13 @@ draw_ui() {
         else
             printf "│   %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
+
+        echo "│                  │                     │"
     done
 
     echo "├──────────────────┴─────────────────────┤"
-    printf "│ CORE %s  SIGNAL %s  READY ▊             │\n" "$SPIN" "$BAR"
+    echo "│  ↑/↓ select        SPACE launch         │"
+    echo "│  ◆ SYSTEM READY ◆                       │"
     echo "└────────────────────────────────────────┘"
 }
 
@@ -79,24 +71,15 @@ run_selection() {
 }
 
 handle_input() {
-    read -rsn1 -t 0.25 key
+    read -rsn1 key
 
-    # If no key was pressed, do absolutely nothing
-    if [ -z "$key" ]; then
-        return
-    fi
-
-    # Arrow keys
     if [[ "$key" == $'\x1b' ]]; then
         read -rsn2 key
         case "$key" in
             "[A") ((SELECTED--)) ;;
             "[B") ((SELECTED++)) ;;
         esac
-    fi
-
-    # Use SPACE to launch instead of Enter
-    if [[ "$key" == " " ]]; then
+    elif [[ "$key" == " " ]]; then
         run_selection
     fi
 
@@ -108,6 +91,13 @@ handle_input() {
         SELECTED=0
     fi
 }
+
+boot_sequence
+
+while true; do
+    draw_ui
+    handle_input
+done
 
 boot_sequence
 
