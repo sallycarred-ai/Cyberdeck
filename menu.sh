@@ -3,23 +3,18 @@
 OPTIONS=("Notes" "Photos" "Videos" "System" "Files" "Quick Note")
 SELECTED=0
 
-show_splash() {
-    sudo fbi -T 1 -noverbose -a ~/cyberdeck/splash.jpg >/dev/null 2>&1 &
-    sleep 2
-    sudo killall fbi >/dev/null 2>&1
-    }
 boot_sequence() {
     clear
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
-    echo "[BOOT] Initialising core..."
+    echo "  [BOOT] Loading SAL OS..."
     sleep 0.3
-    echo "[BOOT] Loading interface..."
+    echo "  [BOOT] Checking modules..."
     sleep 0.3
-    echo "[BOOT] Checking network..."
+    echo "  [BOOT] Network online..."
     sleep 0.3
-    echo "[OK] SYSTEM READY"
-    sleep 1
+    echo "  [OK] System ready"
+    sleep 0.8
 }
 
 draw_ui() {
@@ -28,82 +23,76 @@ draw_ui() {
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
 
-    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
+    TIME=$(date +%H:%M)
+    CPU=$(top -bn1 | awk '/Cpu/ {print $2}')
     MEM=$(free -m | awk '/Mem:/ {print $3}')
     IP=$(hostname -I | awk '{print $1}')
-    TIME=$(date +%H:%M)
 
-    echo "TIME $TIME | CPU $CPU% | MEM ${MEM}MB"
-    echo "IP $IP"
-    echo "===================================="
+    echo "┌────────────────────────────────────────┐"
+    printf "│ TIME %-5s │ CPU %-5s%% │ MEM %-5sMB │\n" "$TIME" "$CPU" "$MEM"
+    printf "│ IP   %-34s │\n" "$IP"
+    echo "├──────────────────┬─────────────────────┤"
 
     for i in "${!OPTIONS[@]}"; do
         case $i in
-            0) INFO="Edit notes" ;;
-            1) INFO="View images" ;;
-            2) INFO="Play clips" ;;
+            0) INFO="Open notes editor" ;;
+            1) INFO="Browse image files" ;;
+            2) INFO="Browse video files" ;;
             3) INFO="System monitor" ;;
-            4) INFO="Browse files" ;;
-            5) INFO="Fast capture" ;;
+            4) INFO="File manager" ;;
+            5) INFO="Fast capture note" ;;
         esac
 
-        if [ $i -eq $SELECTED ]; then
-            printf ">> %-12s | %s\n" "${OPTIONS[$i]}" "$INFO"
+        if [ "$i" -eq "$SELECTED" ]; then
+            printf "│ >> %-13s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         else
-            printf "   %-12s | %s\n" "${OPTIONS[$i]}" "$INFO"
+            printf "│    %-13s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
     done
 
-    echo "===================================="
-    echo "[ READY ]  Select module"
+    echo "├──────────────────┴─────────────────────┤"
+    echo "│  ↑/↓ select        ENTER launch         │"
+    echo "│  [ SYSTEM READY ]                      │"
+    echo "└────────────────────────────────────────┘"
+}
+
+run_selection() {
+    clear
+    case $SELECTED in
+        0) nano ~/Notes/notes.txt ;;
+        1) ls ~/Photos; read -p "Press Enter..." ;;
+        2) ls ~/Videos; read -p "Press Enter..." ;;
+        3) htop ;;
+        4) mc ;;
+        5) nano ~/quicknote.txt ;;
+    esac
 }
 
 handle_input() {
     read -rsn1 key
 
-    if [[ $key == $'\x1b' ]]; then
+    if [[ "$key" == $'\x1b' ]]; then
         read -rsn2 key
         case "$key" in
             "[A") ((SELECTED--)) ;;
             "[B") ((SELECTED++)) ;;
         esac
-    elif [[ $key == "" ]]; then
+    elif [[ "$key" == "" ]]; then
         run_selection
     fi
 
-    if [ $SELECTED -lt 0 ]; then
+    if [ "$SELECTED" -lt 0 ]; then
         SELECTED=$((${#OPTIONS[@]} - 1))
     fi
 
-    if [ $SELECTED -ge ${#OPTIONS[@]} ]; then
+    if [ "$SELECTED" -ge "${#OPTIONS[@]}" ]; then
         SELECTED=0
     fi
-}
-
-run_selection() {
-    case $SELECTED in
-        0) nano ~/Notes/notes.txt ;;
-        1) clear; ls ~/Photos; read -p "Press Enter" ;;
-        2) clear; ls ~/Videos; read -p "Press Enter" ;;
-        3) clear; htop ;;
-        4) clear; ls; read -p "Press Enter" ;;
-        5) nano ~/quicknote.txt ;;
-    esac
 }
 
 boot_sequence
 
 while true; do
-    draw_ui
-    handle_input
-done
-# 🚀 STARTUP
-show_splash
-boot_sequence
-
-# 🔁 MAIN LOOP
-while true
-do
     draw_ui
     handle_input
 done
