@@ -3,6 +3,11 @@
 OPTIONS=("Notes" "Photos" "Videos" "System" "Files" "Quick Note")
 SELECTED=0
 
+show_splash() {
+    sudo fbi -T 1 -noverbose -a ~/cyberdeck/splash.jpg >/dev/null 2>&1 &
+    sleep 2
+    sudo killall fbi >/dev/null 2>&1
+    }
 boot_sequence() {
     clear
     toilet -f small -F border "CYBERDECK SAL"
@@ -82,6 +87,16 @@ run_selection() {
 boot_sequence
 
 while true; do
+    draw_ui
+    handle_input
+done
+# 🚀 STARTUP
+show_splash
+boot_sequence
+
+# 🔁 MAIN LOOP
+while true
+do
     draw_ui
     handle_input
 done
