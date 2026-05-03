@@ -3,39 +3,56 @@
 OPTIONS=("Notes" "Photos" "Videos" "System" "Files" "Quick Note")
 SELECTED=0
 
-draw_menu() {
+draw_ui() {
     clear
 
-    # BIG CYBERDECK TITLE
+    # 🔥 TITLE
     toilet -f small -F border "CYBERDECK SAL"
 
+    # 🕒 TIME + INSTRUCTIONS
     echo ""
-    printf "      %s\n" "$(date +%H:%M)"
-    printf "  Use ↑ ↓ and ENTER\n"
+    printf "        %s\n" "$(date +%H:%M)"
+    printf "     Use ↑ ↓ and ENTER\n"
     echo ""
 
+    # 📋 MENU (centered feel)
     for i in "${!OPTIONS[@]}"; do
         if [ $i -eq $SELECTED ]; then
-            printf "   > %s\n" "${OPTIONS[$i]}"
+            printf "        > %s\n" "${OPTIONS[$i]}"
         else
-            printf "     %s\n" "${OPTIONS[$i]}"
+            printf "          %s\n" "${OPTIONS[$i]}"
         fi
     done
 
     echo ""
+    echo "----------------------"
+
+    # ⚙️ SYSTEM STATUS (fills blank space)
+    CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
+    MEM=$(free -m | awk '/Mem:/ {print $3 "MB"}')
+    IP=$(hostname -I | awk '{print $1}')
+
+    printf " CPU: %s%%\n" "$CPU"
+    printf " MEM: %s\n" "$MEM"
+    printf " IP : %s\n" "$IP"
+
+    echo ""
+    echo "======================"
+    echo "   SYSTEM READY"
+    echo "======================"
 }
 
 while true
 do
-    draw_menu
+    draw_ui
 
     read -rsn1 key
 
     if [[ $key == $'\x1b' ]]; then
         read -rsn2 key
         case $key in
-            "[A") ((SELECTED--)) ;;  # UP
-            "[B") ((SELECTED++)) ;;  # DOWN
+            "[A") ((SELECTED--)) ;;
+            "[B") ((SELECTED++)) ;;
         esac
 
     elif [[ $key == "" ]]; then
