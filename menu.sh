@@ -93,7 +93,7 @@ handle_input() {
 boot_sequence
 clear
 tput civis
-draw_ui
+draw_ui    
 
 while true; do
     OLD_SELECTED=$SELECTED
