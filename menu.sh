@@ -1,5 +1,12 @@
 #!/bin/bash
-
+while true
+do
+  clear
+  toilet -f small "CYBERDECK"
+  echo ""
+  echo ""
+  echo "$(date +%H:%M)"
+  echo "==========================="
 OPTIONS=("Notes" "Photos" "Videos" "System" "Files" "Quick Note")
 SELECTED=0
 
