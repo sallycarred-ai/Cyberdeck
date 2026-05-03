@@ -81,13 +81,22 @@ run_selection() {
 handle_input() {
     read -rsn1 -t 0.25 key
 
+    # If no key was pressed, do absolutely nothing
+    if [ -z "$key" ]; then
+        return
+    fi
+
+    # Arrow keys
     if [[ "$key" == $'\x1b' ]]; then
         read -rsn2 key
         case "$key" in
             "[A") ((SELECTED--)) ;;
             "[B") ((SELECTED++)) ;;
         esac
-    elif [[ "$key" == "" ]]; then
+    fi
+
+    # Use SPACE to launch instead of Enter
+    if [[ "$key" == " " ]]; then
         run_selection
     fi
 
