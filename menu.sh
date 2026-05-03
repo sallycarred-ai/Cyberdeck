@@ -7,14 +7,11 @@ boot_sequence() {
     clear
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
-    echo "  [BOOT] Loading SAL OS..."
-    sleep 0.3
-    echo "  [BOOT] Checking modules..."
-    sleep 0.3
-    echo "  [BOOT] Network online..."
-    sleep 0.3
-    echo "  [OK] System ready"
-    sleep 0.8
+    for msg in "Initialising core" "Loading modules" "Checking network" "Mounting interface" "System ready"; do
+        echo "  [BOOT] $msg..."
+        sleep 0.25
+    done
+    sleep 0.6
 }
 
 draw_ui() {
@@ -28,6 +25,20 @@ draw_ui() {
     MEM=$(free -m | awk '/Mem:/ {print $3}')
     IP=$(hostname -I | awk '{print $1}')
 
+    FRAME=$((SECONDS % 4))
+    case $FRAME in
+        0) SPIN="-" ;;
+        1) SPIN="\\" ;;
+        2) SPIN="|" ;;
+        3) SPIN="/" ;;
+    esac
+
+    case $((SECONDS % 3)) in
+        0) BAR="░▒▓" ;;
+        1) BAR="▒▓█" ;;
+        2) BAR="▓█▓" ;;
+    esac
+
     echo "┌────────────────────────────────────────┐"
     printf "│ TIME %-5s │ CPU %-5s%% │ MEM %-5sMB │\n" "$TIME" "$CPU" "$MEM"
     printf "│ IP   %-34s │\n" "$IP"
@@ -35,24 +46,23 @@ draw_ui() {
 
     for i in "${!OPTIONS[@]}"; do
         case $i in
-            0) INFO="Open notes editor" ;;
-            1) INFO="Browse image files" ;;
-            2) INFO="Browse video files" ;;
-            3) INFO="System monitor" ;;
-            4) INFO="File manager" ;;
-            5) INFO="Fast capture note" ;;
+            0) INFO="Edit notes" ;;
+            1) INFO="Scan images" ;;
+            2) INFO="Load media" ;;
+            3) INFO="Monitor sys" ;;
+            4) INFO="Browse files" ;;
+            5) INFO="Capture note" ;;
         esac
 
         if [ "$i" -eq "$SELECTED" ]; then
-            printf "│ >> %-13s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
+            printf "│ █ %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         else
-            printf "│    %-13s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
+            printf "│   %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
     done
 
     echo "├──────────────────┴─────────────────────┤"
-    echo "│  ↑/↓ select        ENTER launch         │"
-    echo "│  [ SYSTEM READY ]                      │"
+    printf "│ CORE %s  SIGNAL %s  READY ▊             │\n" "$SPIN" "$BAR"
     echo "└────────────────────────────────────────┘"
 }
 
@@ -69,7 +79,7 @@ run_selection() {
 }
 
 handle_input() {
-    read -rsn1 key
+    read -rsn1 -t 0.25 key
 
     if [[ "$key" == $'\x1b' ]]; then
         read -rsn2 key
