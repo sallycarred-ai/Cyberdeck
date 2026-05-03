@@ -38,9 +38,9 @@ draw_ui() {
             0) INFO="Open notes" ;;
             1) INFO="Image files" ;;
             2) INFO="Video files" ;;
-            3) INFO="Monitor" ;;
+            3) INFO="Monitor system" ;;
             4) INFO="Browse files" ;;
-            5) INFO="Fast note" ;;
+            5) INFO="Quick capture" ;;
         esac
 
         if [ "$i" -eq "$SELECTED" ]; then
@@ -49,6 +49,7 @@ draw_ui() {
             printf "│   %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
 
+        # spacing line
         echo "│                  │                     │"
     done
 
@@ -94,14 +95,14 @@ handle_input() {
 
 boot_sequence
 
-while true; do
-    draw_ui
-    handle_input
-done
-
-boot_sequence
+draw_ui
 
 while true; do
-    draw_ui
+    OLD_SELECTED=$SELECTED
+
     handle_input
+
+    if [ "$OLD_SELECTED" -ne "$SELECTED" ]; then
+        draw_ui
+    fi
 done
