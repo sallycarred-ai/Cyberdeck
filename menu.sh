@@ -5,8 +5,7 @@ SELECTED=0
 
 boot_sequence() {
     clear
-    toilet -f small -F border "CYBERDECK SAL"
-    echo ""
+    echo "=== CY    echo ""
     echo "  [BOOT] Loading SAL OS..."
     sleep 0.4
     echo "  [BOOT] Checking modules..."
