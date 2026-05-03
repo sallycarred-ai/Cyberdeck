@@ -7,7 +7,7 @@ draw_menu() {
     clear
 
     # BIG CYBERDECK TITLE
-    toilet -f mono12 -F border "CYBERDECK SAL"
+    toilet -f small -F border "CYBERDECK SAL"
 
     echo ""
     printf "      %s\n" "$(date +%H:%M)"
