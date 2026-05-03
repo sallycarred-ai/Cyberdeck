@@ -5,7 +5,8 @@ SELECTED=0
 
 boot_sequence() {
     clear
-    echo "=== CY    echo ""
+    echo "=== CYBERDECK SAL ==="
+    echo "=== CY    
     echo "  [BOOT] Loading SAL OS..."
     sleep 0.4
     echo "  [BOOT] Checking modules..."
