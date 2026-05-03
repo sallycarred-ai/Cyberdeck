@@ -18,7 +18,7 @@ boot_sequence() {
 }
 
 draw_ui() {
-    clear
+    tput cup 0 0
 
     toilet -f small -F border "CYBERDECK SAL"
     echo ""
@@ -48,9 +48,6 @@ draw_ui() {
         else
             printf "│   %-12s │ %-19s │\n" "${OPTIONS[$i]}" "$INFO"
         fi
-
-        # spacing line
-        echo "│                  │                     │"
     done
 
     echo "├──────────────────┴─────────────────────┤"
@@ -94,12 +91,12 @@ handle_input() {
 }
 
 boot_sequence
-
+clear
+tput civis
 draw_ui
 
 while true; do
     OLD_SELECTED=$SELECTED
-
     handle_input
 
     if [ "$OLD_SELECTED" -ne "$SELECTED" ]; then
