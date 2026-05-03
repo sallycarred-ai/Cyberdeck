@@ -3,76 +3,97 @@
 OPTIONS=("Notes" "Photos" "Videos" "System" "Files" "Quick Note")
 SELECTED=0
 
+boot_sequence() {
+    clear
+    toilet -f small -F border "CYBERDECK SAL"
+    echo ""
+    echo "[BOOT] Initialising core..."
+    sleep 0.3
+    echo "[BOOT] Loading interface..."
+    sleep 0.3
+    echo "[BOOT] Checking network..."
+    sleep 0.3
+    echo "[BOOT] Mounting modules..."
+    sleep 0.3
+    echo "[OK] SYSTEM READY"
+    sleep 1
+}
+
 draw_ui() {
     clear
 
-    # 🔥 TITLE
+    # 🔥 HEADER
     toilet -f small -F border "CYBERDECK SAL"
 
-    # 🕒 TIME + INSTRUCTIONS
     echo ""
-    printf "        %s\n" "$(date +%H:%M)"
-    printf "     Use ↑ ↓ and ENTER\n"
+    date +"   %H:%M"
+    echo "   Use ↑ ↓ and ENTER"
     echo ""
 
-    # 📋 MENU (centered feel)
+    # 📋 MENU
     for i in "${!OPTIONS[@]}"; do
         if [ $i -eq $SELECTED ]; then
-            printf "        > %s\n" "${OPTIONS[$i]}"
+            echo "   > ${OPTIONS[$i]}"
         else
-            printf "          %s\n" "${OPTIONS[$i]}"
+            echo "     ${OPTIONS[$i]}"
         fi
     done
 
     echo ""
-    echo "----------------------"
+    echo "   -----------------------"
 
-    # ⚙️ SYSTEM STATUS (fills blank space)
+    # 📊 SYSTEM PANEL
     CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}')
-    MEM=$(free -m | awk '/Mem:/ {print $3 "MB"}')
+    MEM=$(free -m | awk '/Mem:/ {print $3}')
     IP=$(hostname -I | awk '{print $1}')
 
-    printf " CPU: %s%%\n" "$CPU"
-    printf " MEM: %s\n" "$MEM"
-    printf " IP : %s\n" "$IP"
+    echo "   CPU: ${CPU}%"
+    echo "   MEM: ${MEM}MB"
+    echo "   IP : ${IP}"
 
     echo ""
-    echo "======================"
-    echo "   SYSTEM READY"
-    echo "======================"
+    echo "   ======================="
+    echo "      SYSTEM READY"
+    echo "   ======================="
 }
 
-while true
-do
-    draw_ui
-
+handle_input() {
     read -rsn1 key
-
     if [[ $key == $'\x1b' ]]; then
         read -rsn2 key
-        case $key in
-            "[A") ((SELECTED--)) ;;
-            "[B") ((SELECTED++)) ;;
+        case "$key" in
+            "[A") ((SELECTED--)) ;; # UP
+            "[B") ((SELECTED++)) ;; # DOWN
         esac
-
     elif [[ $key == "" ]]; then
-        clear
-        case $SELECTED in
-            0) nano Notes/notes.txt ;;
-            1) echo "📸 Photos coming soon"; sleep 1 ;;
-            2) echo "🎬 Videos coming soon"; sleep 1 ;;
-            3) htop ;;
-            4) mc ;;
-            5) nano Notes/quick.txt ;;
-        esac
+        run_selection
     fi
 
-    # wrap selection
+    # Wrap around
     if [ $SELECTED -lt 0 ]; then
         SELECTED=$((${#OPTIONS[@]} - 1))
     fi
-
     if [ $SELECTED -ge ${#OPTIONS[@]} ]; then
         SELECTED=0
     fi
+}
+
+run_selection() {
+    case $SELECTED in
+        0) nano ~/Notes/notes.txt ;;
+        1) clear; ls ~/Photos; read -p "Press Enter" ;;
+        2) clear; ls ~/Videos; read -p "Press Enter" ;;
+        3) clear; htop ;;
+        4) clear; ls; read -p "Press Enter" ;;
+        5) nano ~/quicknote.txt ;;
+    esac
+}
+
+# 🚀 STARTUP
+boot_sequence
+
+# 🔁 LOOP
+while true; do
+    draw_ui
+    handle_input
 done
